@@ -1,6 +1,7 @@
 local players = game:GetService("Players")
 local workspace = game:GetService("Workspace")
 local uis = game:GetService("UserInputService")
+local runService = game:GetService("RunService")
 
 local player = players.LocalPlayer
 local character = player.Character or player.CharacterAdded:Wait()
@@ -18,7 +19,7 @@ local Window = Rayfield:CreateWindow({
 	Name = "HD-GUI",
 	Icon = 0, -- Icon in Topbar. Can use Lucide Icons (string) or Roblox Image (number). 0 to use no icon (default).
 	LoadingTitle = "HD-GUI",
-	LoadingSubtitle = "DIN-002",
+	LoadingSubtitle = "DIN-yippee😁😁😁",
 	Theme = "Default", -- Check https://docs.sirius.menu/rayfield/configuration/themes
 
 	DisableRayfieldPrompts = false,
@@ -149,17 +150,43 @@ local SpinToggle = MovementTab:CreateToggle({
 	CurrentValue = false,
 	Flag = "SpinToggle", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
 	Callback = function(Value)
+		local power = 5000 -- Modify this to adjust the spin force
+		
+		local collisionConnection = nil -- Store the connection for cleanup
+
 		if Value then
+			-- Add BodyThrust for spinning
 			local thrust = Instance.new("BodyThrust")
-			thrust.Name = "SpinThrust" -- Assign a unique name to identify it later
+			thrust.Name = "SpinThrust"
 			thrust.Parent = hrp
-			thrust.Force = Vector3.new(0, 0, 0) -- Initialize with zero force
+			thrust.Force = Vector3.new(power, 0, power)
 			thrust.Location = hrp.Position
-			thrust.Force = Vector3.new(0, 5000, 0) -- Adjust force as needed
+
+			-- Disable collisions for specific body parts
+			collisionConnection = runService.Stepped:Connect(function()
+				local characterParts = {
+					character.Head,
+					character.UpperTorso,
+					character.LowerTorso,
+					character.HumanoidRootPart
+				}
+				for _, part in ipairs(characterParts) do
+					if part then
+						part.CanCollide = false
+					end
+				end
+			end)
 		else
+			-- Remove BodyThrust
 			local thrust = hrp:FindFirstChild("SpinThrust")
 			if thrust then
 				thrust:Destroy()
+			end
+
+			-- Disconnect collision disabling event
+			if collisionConnection then
+				collisionConnection:Disconnect()
+				collisionConnection = nil
 			end
 		end
 	end,
