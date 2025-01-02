@@ -3,8 +3,14 @@ local workspace = game:GetService("Workspace")
 local uis = game:GetService("UserInputService")
 
 local player = players.LocalPlayer
-local character = player.Character or player.CharacterAdded:Wait() 
+local character = player.Character or player.CharacterAdded:Wait()
 local hrp = character:WaitForChild("HumanoidRootPart")
+
+-- Listen for character respawns to update references
+player.CharacterAdded:Connect(function(char)
+	character = char
+	hrp = character:WaitForChild("HumanoidRootPart")
+end)
 
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
@@ -12,7 +18,7 @@ local Window = Rayfield:CreateWindow({
 	Name = "HD-GUI",
 	Icon = 0, -- Icon in Topbar. Can use Lucide Icons (string) or Roblox Image (number). 0 to use no icon (default).
 	LoadingTitle = "HD-GUI",
-	LoadingSubtitle = "DIN-001",
+	LoadingSubtitle = "DIN-002",
 	Theme = "Default", -- Check https://docs.sirius.menu/rayfield/configuration/themes
 
 	DisableRayfieldPrompts = false,
@@ -52,9 +58,12 @@ local WalkSpeedInput = MovementTab:CreateInput({
 	RemoveTextAfterFocusLost = false,
 	Flag = "WalkSpeedInput",
 	Callback = function(Text)
-		-- The function that takes place when the input is changed
-		-- The variable (Text) is a string for the value in the text box
-		character.Humanoid.WalkSpeed = Text
+		local speed = tonumber(Text)
+		if speed then
+			character.Humanoid.WalkSpeed = speed
+		else
+			warn("Invalid WalkSpeed input. Please enter a number.")
+		end
 	end,
 })
 
@@ -65,9 +74,12 @@ local JumpPowerInput = MovementTab:CreateInput({
 	RemoveTextAfterFocusLost = false,
 	Flag = "JumpPowerInput",
 	Callback = function(Text)
-		-- The function that takes place when the input is changed
-		-- The variable (Text) is a string for the value in the text box
-		character.Humanoid.JumpPower = Text
+		local jump = tonumber(Text)
+		if jump then
+			character.Humanoid.JumpPower = jump
+		else
+			warn("Invalid JumpPower input. Please enter a number.")
+		end
 	end,
 })
 
@@ -78,29 +90,30 @@ local GravityInput = MovementTab:CreateInput({
 	RemoveTextAfterFocusLost = false,
 	Flag = "GravityInput",
 	Callback = function(Text)
-		-- The function that takes place when the input is changed
-		-- The variable (Text) is a string for the value in the text box
-		workspace.Gravity = Text
+		local gravity = tonumber(Text)
+		if gravity then
+			workspace.Gravity = gravity
+		else
+			warn("Invalid Gravity input. Please enter a number.")
+		end
 	end,
 })
 
 local MovementModificationsSection = MovementTab:CreateSection("Modifications")
+
+-- Declare jumpConnection outside the callback to maintain its state
+local jumpConnection = nil
 
 local InfiniteJumpToggle = MovementTab:CreateToggle({
 	Name = "Infinite Jump",
 	CurrentValue = false,
 	Flag = "InfiniteJumpToggle", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
 	Callback = function(Value)
-		-- The function that takes place when the toggle is pressed
-		-- The variable (Value) is a boolean on whether the toggle is true or false
-		
-		local jumpConnection
-		
 		if Value then
 			-- Connect the JumpRequest event and store the connection
 			jumpConnection = uis.JumpRequest:Connect(function()
 				local humanoid = character:FindFirstChildOfClass("Humanoid")
-				if humanoid then
+				if humanoid and humanoid:GetState() ~= Enum.HumanoidStateType.Jumping then
 					humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
 				end
 			end)
@@ -111,36 +124,43 @@ local InfiniteJumpToggle = MovementTab:CreateToggle({
 				jumpConnection = nil
 			end
 		end
-
 	end,
 })
+
+-- Handling character respawn while Infinite Jump is enabled
+player.CharacterAdded:Connect(function(char)
+	character = char
+	hrp = character:WaitForChild("HumanoidRootPart")
+	if InfiniteJumpToggle:Get() then
+		-- Re-establish the connection if the toggle is on
+		if not jumpConnection then
+			jumpConnection = uis.JumpRequest:Connect(function()
+				local humanoid = character:FindFirstChildOfClass("Humanoid")
+				if humanoid and humanoid:GetState() ~= Enum.HumanoidStateType.Jumping then
+					humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+				end
+			end)
+		end
+	end
+end)
 
 local SpinToggle = MovementTab:CreateToggle({
 	Name = "Spin",
 	CurrentValue = false,
 	Flag = "SpinToggle", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
 	Callback = function(Value)
-		-- The function that takes place when the toggle is pressed
-		-- The variable (Value) is a boolean on whether the toggle is true or false
-		power = 5000 -- change this to make it more or less powerful
-
-		--[[game:GetService('RunService').Stepped:connect(function()
-			game.Players.LocalPlayer.Character.Head.CanCollide = false
-			game.Players.LocalPlayer.Character.UpperTorso.CanCollide = false
-			game.Players.LocalPlayer.Character.LowerTorso.CanCollide = false
-			game.Players.LocalPlayer.Character.HumanoidRootPart.CanCollide = false
-		end)
-		wait(.1)]]--
-
 		if Value then
 			local thrust = Instance.new("BodyThrust")
+			thrust.Name = "SpinThrust" -- Assign a unique name to identify it later
 			thrust.Parent = hrp
-			thrust.Force = Vector3.new(power,0,power)
+			thrust.Force = Vector3.new(0, 0, 0) -- Initialize with zero force
 			thrust.Location = hrp.Position
-			Value = true
-		elseif not Value then
-			hrp.BodyThrust:Destroy()
-			Value = false
+			thrust.Force = Vector3.new(0, 5000, 0) -- Adjust force as needed
+		else
+			local thrust = hrp:FindFirstChild("SpinThrust")
+			if thrust then
+				thrust:Destroy()
+			end
 		end
 	end,
 })
