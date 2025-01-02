@@ -1,3 +1,5 @@
+local din = "000"
+
 local players = game:GetService("Players")
 local workspace = game:GetService("Workspace")
 local uis = game:GetService("UserInputService")
@@ -17,10 +19,10 @@ end)
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
 local Window = Rayfield:CreateWindow({
-	Name = "HD-GUI",
+	Name = "HD-GUI (din:"..din..")",
 	Icon = 0, -- Icon in Topbar. Can use Lucide Icons (string) or Roblox Image (number). 0 to use no icon (default).
 	LoadingTitle = "HD-GUI",
-	LoadingSubtitle = "Loading HD-GUI... (din:002)",
+	LoadingSubtitle = "Loading HD-GUI... (din:"..din..")",
 	Theme = "Default", -- Check https://docs.sirius.menu/rayfield/configuration/themes
 
 	DisableRayfieldPrompts = false,
@@ -205,6 +207,9 @@ local verticalSpeed = 30 -- Vertical speed for flying up and down
 local bodyGyro = nil
 local bodyVelocity = nil
 
+local verticalVelocity = 0
+local horizontalVelocity = Vector3.new(0, 0, 0)
+
 local function startFlying()
 	if not flying then
 		flying = true
@@ -240,7 +245,7 @@ local function startFlying()
 				end
 
 				-- Apply horizontal movement (WASD controls)
-				bodyVelocity.Velocity = Vector3.new(moveDirection.X * speed, bodyVelocity.Velocity.Y, moveDirection.Z * speed)
+				horizontalVelocity = moveDirection * speed
 			end
 		end)
 
@@ -263,11 +268,11 @@ local function startFlying()
 			end
 		end)
 
-		-- Maintain the upward force
+		-- Maintain the upward force and horizontal velocity
 		game:GetService("RunService").Heartbeat:Connect(function()
 			if flying then
-				-- Keep character suspended by controlling vertical velocity
-				bodyVelocity.Velocity = Vector3.new(bodyVelocity.Velocity.X, verticalVelocity, bodyVelocity.Velocity.Z)
+				-- Apply both horizontal and vertical velocity
+				bodyVelocity.Velocity = Vector3.new(horizontalVelocity.X, verticalVelocity, horizontalVelocity.Z)
 			end
 		end)
 	end
