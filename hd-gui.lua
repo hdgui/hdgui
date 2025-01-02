@@ -13,6 +13,14 @@ player.CharacterAdded:Connect(function(char)
 	hrp = character:WaitForChild("HumanoidRootPart")
 end)
 
+local function getPlayerOptions()
+	local playerOptions = {"All"} -- Start with the "All" option
+	for _, player in ipairs(players:GetPlayers()) do
+		table.insert(playerOptions, player.Name) -- Add each player's name
+	end
+	return playerOptions
+end
+
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
 local Window = Rayfield:CreateWindow({
@@ -68,7 +76,7 @@ local WalkSpeedInput = MovementTab:CreateInput({
 		if speed then
 			character.Humanoid.WalkSpeed = speed
 		else
-			warn("Invalid WalkSpeed input. Please enter a number.")
+			warn("Invalid input. Please enter a number.")
 		end
 	end,
 })
@@ -84,7 +92,7 @@ local JumpPowerInput = MovementTab:CreateInput({
 		if jump then
 			character.Humanoid.JumpPower = jump
 		else
-			warn("Invalid JumpPower input. Please enter a number.")
+			warn("Invalid input. Please enter a number.")
 		end
 	end,
 })
@@ -100,7 +108,7 @@ local GravityInput = MovementTab:CreateInput({
 		if gravity then
 			workspace.Gravity = gravity
 		else
-			warn("Invalid Gravity input. Please enter a number.")
+			warn("Invalid input. Please enter a number.")
 		end
 	end,
 })
@@ -196,3 +204,27 @@ local SpinToggle = MovementTab:CreateToggle({
 		end
 	end,
 })
+
+local PlayersTab = Window:CreateTab("Players", 0) -- Title, Image
+local PlayersIDKSection = PlayersTab:CreateSection("uhh idk")
+
+local Dropdown = PlayersTab:CreateDropdown({
+	Name = "Player Selection",
+	Options = getPlayerOptions(), -- Dynamically fetch the player options
+	CurrentOption = {"All"},
+	MultipleOptions = true,
+	Flag = "Dropdown1", -- Ensure the flag is unique
+	Callback = function(Options)
+		-- The function that takes place when the selected option is changed
+		-- The variable (Options) is a table of strings for the current selected options
+		print("Selected option:", Options[1])
+	end,
+})
+
+players.PlayerAdded:Connect(function()
+	Dropdown:Set(getPlayerOptions()) -- Update the dropdown with new player list
+end)
+
+players.PlayerRemoving:Connect(function()
+	Dropdown:Set(getPlayerOptions()) -- Update the dropdown with new player list
+end)
