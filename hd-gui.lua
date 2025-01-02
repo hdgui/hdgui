@@ -93,15 +93,16 @@ local InfiniteJumpToggle = MovementTab:CreateToggle({
 	Callback = function(Value)
 		-- The function that takes place when the toggle is pressed
 		-- The variable (Value) is a boolean on whether the toggle is true or false
-		if Value then
-			uis.JumpRequest:Connect(function()
+		uis.JumpRequest:Connect(function()
+			if Value then
 				character:FindFirstChildOfClass("Humanoid"):ChangeState(Enum.HumanoidStateType.Jumping)
 				Value = true
-			end)
-		else
-			character:FindFirstChildOfClass("Humanoid"):ChangeState(Enum.HumanoidStateType.Freefall)
-			Value = false
-		end
+
+			else
+				character:FindFirstChildOfClass("Humanoid"):ChangeState()
+				Value = false
+			end
+		end)
 	end)
 end,
 })
