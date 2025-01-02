@@ -128,7 +128,7 @@ local SpinToggle = MovementTab:CreateToggle({
 		end)
 		wait(.1)]]--
 		
-		if Value == true then
+		if Value then
 			Rayfield:Notify({
 				Title = "true",
 				Content = "Notification Content",
@@ -139,7 +139,8 @@ local SpinToggle = MovementTab:CreateToggle({
 			thrust.Parent = game:GetService("Players").LocalPlayer.Character.HumanoidRootPart
 			thrust.Force = Vector3.new(power,0,power)
 			thrust.Location = game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.Position
-		else
+			Value = true
+		elseif not Value then
 			Rayfield:No2tify({
 				Title = "false",
 				Content = "Notification Content",
@@ -147,6 +148,7 @@ local SpinToggle = MovementTab:CreateToggle({
 				Image = 4483362458,
 			})
 			game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.BodyThrust:Destroy()
+			Value = false
 		end
 	end,
 })
