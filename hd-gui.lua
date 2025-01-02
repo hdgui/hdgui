@@ -12,7 +12,7 @@ local Window = Rayfield:CreateWindow({
 	Name = "HD-GUI",
 	Icon = 0, -- Icon in Topbar. Can use Lucide Icons (string) or Roblox Image (number). 0 to use no icon (default).
 	LoadingTitle = "HD-GUI",
-	LoadingSubtitle = "DIN-PLEASE",
+	LoadingSubtitle = "DIN-i.swear.to.shit",
 	Theme = "Default", -- Check https://docs.sirius.menu/rayfield/configuration/themes
 
 	DisableRayfieldPrompts = false,
@@ -93,18 +93,18 @@ local InfiniteJumpToggle = MovementTab:CreateToggle({
 	Callback = function(Value)
 		-- The function that takes place when the toggle is pressed
 		-- The variable (Value) is a boolean on whether the toggle is true or false
-		uis.JumpRequest:Connect(function()
-			if Value then
-				character:FindFirstChildOfClass("Humanoid"):ChangeState(Enum.HumanoidStateType.Jumping)
-				Value = true
 
-			else
-				character:FindFirstChildOfClass("Humanoid"):ChangeState()
-				Value = false
-			end
-		end)
-	end)
-end,
+		if Value then
+			uis.JumpRequest:Connect(function()
+				character:FindFirstChildOfClass("Humanoid"):ChangeState(Enum.HumanoidStateType.Jumping)
+			end)
+			Value = true
+		else
+			character:FindFirstChildOfClass("Humanoid"):ChangeState()
+			Value = false
+		end
+
+	end,
 })
 
 local SpinToggle = MovementTab:CreateToggle({
