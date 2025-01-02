@@ -4,6 +4,7 @@ local uis = game:GetService("UserInputService")
 
 local player = players.LocalPlayer
 local character = player.Character or player.CharacterAdded:Wait() 
+local hrp = character:WaitForChild("HumanoidRootPart")
 
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
@@ -11,7 +12,7 @@ local Window = Rayfield:CreateWindow({
 	Name = "HD-GUI",
 	Icon = 0, -- Icon in Topbar. Can use Lucide Icons (string) or Roblox Image (number). 0 to use no icon (default).
 	LoadingTitle = "HD-GUI",
-	LoadingSubtitle = "DIN-22",
+	LoadingSubtitle = "DIN-3",
 	Theme = "Default", -- Check https://docs.sirius.menu/rayfield/configuration/themes
 
 	DisableRayfieldPrompts = false,
@@ -125,12 +126,12 @@ local SpinToggle = MovementTab:CreateToggle({
 
 		if Value then
 			local thrust = Instance.new("BodyThrust")
-			thrust.Parent = character.HumanoidRootPart
+			thrust.Parent = hrp
 			thrust.Force = Vector3.new(power,0,power)
-			thrust.Location = character.HumanoidRootPart.Position
+			thrust.Location = hrp.Position
 			Value = true
 		elseif not Value then
-			character.HumanoidRootPart.BodyThrust:Destroy()
+			hrp.BodyThrust:Destroy()
 			Value = false
 		end
 	end,
