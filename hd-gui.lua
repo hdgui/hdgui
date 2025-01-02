@@ -27,7 +27,7 @@ local Window = Rayfield:CreateWindow({
 	Name = "HD-GUI",
 	Icon = 0, -- Icon in Topbar. Can use Lucide Icons (string) or Roblox Image (number). 0 to use no icon (default).
 	LoadingTitle = "HD-GUI",
-	LoadingSubtitle = "Loading HD-GUI...",
+	LoadingSubtitle = "Loading HD-GUI... (drn:001)",
 	Theme = "Default", -- Check https://docs.sirius.menu/rayfield/configuration/themes
 
 	DisableRayfieldPrompts = false,
@@ -217,7 +217,7 @@ local Dropdown = PlayersTab:CreateDropdown({
 	Callback = function(Options)
 		-- The function that takes place when the selected option is changed
 		-- The variable (Options) is a table of strings for the current selected options
-		print("Selected option:", Options[1])
+		print("Selected option:", Options)
 	end,
 })
 
