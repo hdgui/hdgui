@@ -20,7 +20,7 @@ local Window = Rayfield:CreateWindow({
 	Name = "HD-GUI",
 	Icon = 0, -- Icon in Topbar. Can use Lucide Icons (string) or Roblox Image (number). 0 to use no icon (default).
 	LoadingTitle = "HD-GUI",
-	LoadingSubtitle = "Loading HD-GUI... (din:000)",
+	LoadingSubtitle = "Loading HD-GUI... (din:001)",
 	Theme = "Default", -- Check https://docs.sirius.menu/rayfield/configuration/themes
 
 	DisableRayfieldPrompts = false,
@@ -281,7 +281,7 @@ local FlyToggle = MovementTab:CreateToggle({
 			Value = true
 		else
 			stopFlying()
-			value = false
+			Value = false
 		end
 	end,
 })
