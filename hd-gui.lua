@@ -120,11 +120,6 @@ local SpinToggle = MovementTab:CreateToggle({
 		-- The variable (Value) is a boolean on whether the toggle is true or false
 		power = 5000 -- change this to make it more or less powerful
 		
-		local thrust = Instance.new("BodyThrust")
-		thrust.Parent = game:GetService("Players").LocalPlayer.Character.HumanoidRootPart
-		thrust.Force = Vector3.new(power,0,power)
-		thrust.Location = game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.Position
-		
 		--[[game:GetService('RunService').Stepped:connect(function()
 			game.Players.LocalPlayer.Character.Head.CanCollide = false
 			game.Players.LocalPlayer.Character.UpperTorso.CanCollide = false
@@ -134,7 +129,10 @@ local SpinToggle = MovementTab:CreateToggle({
 		wait(.1)]]--
 		
 		if Value == true then
+			local thrust = Instance.new("BodyThrust")
+			thrust.Parent = game:GetService("Players").LocalPlayer.Character.HumanoidRootPart
 			thrust.Force = Vector3.new(power,0,power)
+			thrust.Location = game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.Position
 		else
 			thrust:Destroy()
 		end
