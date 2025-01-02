@@ -20,7 +20,7 @@ local Window = Rayfield:CreateWindow({
 	Name = "HD-GUI",
 	Icon = 0, -- Icon in Topbar. Can use Lucide Icons (string) or Roblox Image (number). 0 to use no icon (default).
 	LoadingTitle = "HD-GUI",
-	LoadingSubtitle = "Loading HD-GUI... (drn:002)",
+	LoadingSubtitle = "Loading HD-GUI... (drn:003)",
 	Theme = "Default", -- Check https://docs.sirius.menu/rayfield/configuration/themes
 
 	DisableRayfieldPrompts = false,
@@ -198,7 +198,61 @@ local SpinToggle = MovementTab:CreateToggle({
 	end,
 })
 
-flying = true
+local flying = false
+local speed = 50 -- Speed of flying
+local flyUpForce = 25 -- Upward force for flying
+
+local bodyGyro = nil
+local bodyVelocity = nil
+
+local function startFlying()
+	if not flying then
+		flying = true
+
+		-- Create BodyGyro to prevent the character from spinning
+		bodyGyro = Instance.new("BodyGyro")
+		bodyGyro.MaxTorque = Vector3.new(400000, 400000, 400000)
+		bodyGyro.CFrame = hrp.CFrame
+		bodyGyro.Parent = hrp
+
+		-- Create BodyVelocity to apply movement and upward force
+		bodyVelocity = Instance.new("BodyVelocity")
+		bodyVelocity.MaxForce = Vector3.new(400000, 400000, 400000)
+		bodyVelocity.Velocity = Vector3.new(0, flyUpForce, 0) -- Apply upward force initially
+		bodyVelocity.Parent = hrp
+
+		-- Maintain movement in the air
+		uis.InputChanged:Connect(function(input)
+			if flying then
+				local moveDirection = Vector3.new(0, 0, 0)
+
+				if input.UserInputType == Enum.UserInputType.MouseMovement then
+					local mousePosition = uis:GetMouseLocation()
+					-- You can use the mouse to guide the direction if needed
+				end
+
+				-- Update body velocity to simulate movement in the air
+				bodyVelocity.Velocity = Vector3.new(moveDirection.X, bodyVelocity.Velocity.Y, moveDirection.Z) + hrp.Velocity * 0.5
+			end
+		end)
+	end
+end
+
+local function stopFlying()
+	if flying then
+		flying = false
+
+		-- Remove BodyGyro and BodyVelocity to stop flying
+		if bodyGyro then
+			bodyGyro:Destroy()
+			bodyGyro = nil
+		end
+		if bodyVelocity then
+			bodyVelocity:Destroy()
+			bodyVelocity = nil
+		end
+	end
+end
 
 local FlyToggle = MovementTab:CreateToggle({
 	Name = "Fly",
@@ -207,112 +261,13 @@ local FlyToggle = MovementTab:CreateToggle({
 	Callback = function(Value)
 		-- The function that takes place when the toggle is pressed
 		-- The variable (Value) is a boolean on whether the toggle is true or false
-		if workspace:FindFirstChild("Core") then
-			workspace.Core:Destroy()
+		if Value then
+			startFlying()
+			Value = true
+		else
+			stopFlying()
+			value = false
 		end
-
-		local Core = Instance.new("Part")
-		Core.Name = "Core"
-		Core.Size = Vector3.new(0.05, 0.05, 0.05)
-
-		spawn(function()
-			Core.Parent = workspace
-			local Weld = Instance.new("Weld", Core)
-			Weld.Part0 = Core
-			Weld.Part1 = localplayer.Character.LowerTorso
-			Weld.C0 = CFrame.new(0, 0, 0)
-		end)
-		
-		workspace:WaitForChild("Core")
-
-		local torso = workspace.Core
-		
-		local speed=10
-		local keys={a=false,d=false,w=false,s=false}
-		local e1
-		local e2
-		local function start()
-			local pos = Instance.new("BodyPosition",torso)
-			local gyro = Instance.new("BodyGyro",torso)
-			pos.Name="EPIXPOS"
-			pos.maxForce = Vector3.new(math.huge, math.huge, math.huge)
-			pos.position = torso.Position
-			gyro.maxTorque = Vector3.new(9e9, 9e9, 9e9)
-			gyro.cframe = torso.CFrame
-			repeat
-				wait()
-				player.Character.Humanoid.PlatformStand=true
-				local new=gyro.cframe - gyro.cframe.p + pos.position
-				if not keys.w and not keys.s and not keys.a and not keys.d then
-					speed=5
-				end
-				if keys.w then
-					new = new + workspace.CurrentCamera.CoordinateFrame.lookVector * speed
-					speed=speed+0
-				end
-				if keys.s then
-					new = new - workspace.CurrentCamera.CoordinateFrame.lookVector * speed
-					speed=speed+0
-				end
-				if keys.d then
-					new = new * CFrame.new(speed,0,0)
-					speed=speed+0
-				end
-				if keys.a then
-					new = new * CFrame.new(-speed,0,0)
-					speed=speed+0
-				end
-				if speed>10 then
-					speed=5
-				end
-				pos.position=new.p
-				if keys.w then
-					gyro.cframe = workspace.CurrentCamera.CoordinateFrame*CFrame.Angles(-math.rad(speed*0),0,0)
-				elseif keys.s then
-					gyro.cframe = workspace.CurrentCamera.CoordinateFrame*CFrame.Angles(math.rad(speed*0),0,0)
-				else
-					gyro.cframe = workspace.CurrentCamera.CoordinateFrame
-				end
-			until flying == false
-			if gyro then gyro:Destroy() end
-			if pos then pos:Destroy() end
-			flying=false
-			player.Character.Humanoid.PlatformStand=false
-			speed=10
-		end
-		
-		e1=mouse.KeyDown:connect(function(key)
-			if not torso or not torso.Parent then flying=false e1:disconnect() e2:disconnect() return end
-			if key=="w" then
-				keys.w=true
-			elseif key=="s" then
-				keys.s=true
-			elseif key=="a" then
-				keys.a=true
-			elseif key=="d" then
-				keys.d=true
-			elseif key=="x" then
-				if flying==true then
-					flying=false
-				else
-					flying=true
-					start()
-				end
-			end
-		end)
-		
-		e2=mouse.KeyUp:connect(function(key)
-			if key=="w" then
-				keys.w=false
-			elseif key=="s" then
-				keys.s=false
-			elseif key=="a" then
-				keys.a=false
-			elseif key=="d" then
-				keys.d=false
-			end
-		end)
-		start()
 	end,
 })
 
