@@ -142,11 +142,10 @@ local SwimToggle = MovementTab:CreateToggle({
 	Callback = function(Value)
 		if Value then
 			-- Connect the JumpRequest event and store the connection
-				local humanoid = character:FindFirstChildOfClass("Humanoid")
-				if humanoid and humanoid:GetState() ~= Enum.HumanoidStateType.Swimming then
-					humanoid:ChangeState(Enum.HumanoidStateType.Swimming)
-				end
-			end)
+			local humanoid = character:FindFirstChildOfClass("Humanoid")
+			if humanoid and humanoid:GetState() ~= Enum.HumanoidStateType.Swimming then
+				humanoid:ChangeState(Enum.HumanoidStateType.Swimming)
+			end
 		else
 			-- Disconnect the JumpRequest connection when toggled off
 			if swimConnection then
@@ -180,7 +179,7 @@ local SpinToggle = MovementTab:CreateToggle({
 	Flag = "SpinToggle", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
 	Callback = function(Value)
 		local power = 5000 -- Modify this to adjust the spin force
-		
+
 		local collisionConnection = nil -- Store the connection for cleanup
 
 		if Value then
