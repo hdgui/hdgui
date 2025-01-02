@@ -134,7 +134,7 @@ local SpinToggle = MovementTab:CreateToggle({
 			thrust.Force = Vector3.new(power,0,power)
 			thrust.Location = game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.Position
 		else
-			print(game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.BodyThrust)
+			game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.BodyThrust:Destroy()
 		end
 	end,
 })
