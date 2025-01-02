@@ -12,7 +12,7 @@ local Window = Rayfield:CreateWindow({
 	Name = "HD-GUI",
 	Icon = 0, -- Icon in Topbar. Can use Lucide Icons (string) or Roblox Image (number). 0 to use no icon (default).
 	LoadingTitle = "HD-GUI",
-	LoadingSubtitle = "DIN-fuckme",
+	LoadingSubtitle = "DIN-88",
 	Theme = "Default", -- Check https://docs.sirius.menu/rayfield/configuration/themes
 
 	DisableRayfieldPrompts = false,
@@ -96,7 +96,9 @@ local InfiniteJumpToggle = MovementTab:CreateToggle({
 			local InfiniteJumpEnabled
 		uis.JumpRequest:Connect(function()
 			if Value then
-				character:FindFirstChildOfClass("Humanoid"):ChangeState("Jumping")
+				character:FindFirstChildOfClass("Humanoid"):ChangeState(Enum.HumanoidStateType.Jumping)
+			else
+				character:FindFirstChildOfClass("Humanoid"):ChangeState(Enum.HumanoidStateType.Freefall)
 			end
 		end)
 	end,
