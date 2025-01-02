@@ -111,6 +111,11 @@ local InfiniteJumpToggle = MovementTab:CreateToggle({
 	end,
 })
 
+local thrust = Instance.new("BodyThrust")
+thrust.Parent = game:GetService("Players").LocalPlayer.Character.HumanoidRootPart
+thrust.Force = Vector3.new(power,0,power)
+thrust.Location = game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.Position
+
 local SpinToggle = MovementTab:CreateToggle({
 	Name = "Spin",
 	CurrentValue = false,
@@ -119,11 +124,6 @@ local SpinToggle = MovementTab:CreateToggle({
 		-- The function that takes place when the toggle is pressed
 		-- The variable (Value) is a boolean on whether the toggle is true or false
 		power = 5000 -- change this to make it more or less powerful
-		
-		local thrust = Instance.new("BodyThrust")
-		thrust.Parent = game:GetService("Players").LocalPlayer.Character.HumanoidRootPart
-		thrust.Force = Vector3.new(power,0,power)
-		thrust.Location = game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.Position
 		
 		--[[game:GetService('RunService').Stepped:connect(function()
 			game.Players.LocalPlayer.Character.Head.CanCollide = false
