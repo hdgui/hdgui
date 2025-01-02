@@ -1,4 +1,4 @@
-local din = "999"
+local din = "998"
 
 local players = game:GetService("Players")
 local workspace = game:GetService("Workspace")
@@ -231,7 +231,7 @@ local FlyInput = MovementTab:CreateInput({
 		
 		if flyspeed then
 			_G.StartFly = Text
-			if _G.StartFly <= 0 then
+			if _G.StartFly then
 				if game.Players.LocalPlayer.Character and game.Players.LocalPlayer.Character:FindFirstChildOfClass("Humanoid") and game.Players.LocalPlayer.Character.Humanoid.RootPart and game.Players.LocalPlayer.Character.HumanoidRootPart:FindFirstChild("VelocityHandler") and game.Players.LocalPlayer.Character.HumanoidRootPart:FindFirstChild("GyroHandler") then
 					game.Players.LocalPlayer.Character.HumanoidRootPart.VelocityHandler:Destroy()
 					game.Players.LocalPlayer.Character.HumanoidRootPart.GyroHandler:Destroy()
