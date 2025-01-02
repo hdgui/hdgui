@@ -1,4 +1,4 @@
-local din = "050"
+local din = "048"
 
 local players = game:GetService("Players")
 local workspace = game:GetService("Workspace")
@@ -218,7 +218,7 @@ local SpinToggle = MovementTab:CreateToggle({
 
 _G.SetSpeedFly = 5
 
-local FlyInput = MovementTab:CreateInput({
+local FlyToggle = MovementTab:CreateToggle({
 	Name = "Fly",
 	CurrentValue = false,
 	Flag = "FlyToggle", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
