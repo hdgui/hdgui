@@ -20,7 +20,7 @@ local Window = Rayfield:CreateWindow({
 	Name = "HD-GUI",
 	Icon = 0, -- Icon in Topbar. Can use Lucide Icons (string) or Roblox Image (number). 0 to use no icon (default).
 	LoadingTitle = "HD-GUI",
-	LoadingSubtitle = "Loading HD-GUI... (din:001)",
+	LoadingSubtitle = "Loading HD-GUI... (din:002)",
 	Theme = "Default", -- Check https://docs.sirius.menu/rayfield/configuration/themes
 
 	DisableRayfieldPrompts = false,
@@ -218,7 +218,7 @@ local function startFlying()
 		-- Create BodyVelocity to control movement and upward force
 		bodyVelocity = Instance.new("BodyVelocity")
 		bodyVelocity.MaxForce = Vector3.new(400000, 400000, 400000)
-		bodyVelocity.Velocity = Vector3.new(0, verticalSpeed, 0) -- Initial upward force
+		bodyVelocity.Velocity = Vector3.new(0, 0, 0) -- Start with no vertical or horizontal movement
 		bodyVelocity.Parent = hrp
 
 		-- Listen for input to control movement while flying
@@ -244,10 +244,30 @@ local function startFlying()
 			end
 		end)
 
+		-- Listen for Q and E to move up and down
+		uis.InputBegan:Connect(function(input, gameProcessed)
+			if flying and not gameProcessed then
+				if input.KeyCode == Enum.KeyCode.Q then
+					verticalVelocity = -verticalSpeed -- Move down when Q is pressed
+				elseif input.KeyCode == Enum.KeyCode.E then
+					verticalVelocity = verticalSpeed -- Move up when E is pressed
+				end
+			end
+		end)
+
+		uis.InputEnded:Connect(function(input)
+			if flying then
+				if input.KeyCode == Enum.KeyCode.Q or input.KeyCode == Enum.KeyCode.E then
+					verticalVelocity = 0 -- Stop vertical movement when Q or E is released
+				end
+			end
+		end)
+
 		-- Maintain the upward force
 		game:GetService("RunService").Heartbeat:Connect(function()
 			if flying then
-				bodyVelocity.Velocity = Vector3.new(bodyVelocity.Velocity.X, verticalSpeed, bodyVelocity.Velocity.Z)
+				-- Keep character suspended by controlling vertical velocity
+				bodyVelocity.Velocity = Vector3.new(bodyVelocity.Velocity.X, verticalVelocity, bodyVelocity.Velocity.Z)
 			end
 		end)
 	end
