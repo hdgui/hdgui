@@ -1,4 +1,4 @@
-local din = "001"
+local din = "101"
 
 local players = game:GetService("Players")
 local workspace = game:GetService("Workspace")
@@ -237,11 +237,15 @@ local FlyToggle = MovementTab:CreateToggle({
 	Callback = function(Value)
 		-- The function that takes place when the toggle is pressed
 		-- The variable (Value) is a boolean on whether the toggle is true or false
-		if Value then
-			fly()
-		else
-			endFlying()
-		end
+		uis.InputBegan:connect(function(input)
+			if input.KeyCode == Enum.KeyCode.W then
+				if Value then
+					fly()
+				else
+					endFlying()
+				end
+			end
+		end)
 	end,
 })
 
