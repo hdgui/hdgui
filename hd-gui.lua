@@ -11,7 +11,7 @@ local Window = Rayfield:CreateWindow({
 	Name = "HD-GUI",
 	Icon = 0, -- Icon in Topbar. Can use Lucide Icons (string) or Roblox Image (number). 0 to use no icon (default).
 	LoadingTitle = "HD-GUI",
-	LoadingSubtitle = "DIN-1",
+	LoadingSubtitle = "DIN-2",
 	Theme = "Default", -- Check https://docs.sirius.menu/rayfield/configuration/themes
 
 	DisableRayfieldPrompts = false,
@@ -89,10 +89,14 @@ local InfiniteJumpToggle = MovementTab:CreateToggle({
 	Name = "Infinite Jump",
 	CurrentValue = false,
 	Flag = "InfiniteJumpToggle", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
-	Callback = function(InfiniteJumpEnabled)
+	Callback = function(Value)
 		-- The function that takes place when the toggle is pressed
 		-- The variable (Value) is a boolean on whether the toggle is true or false
-		local InfiniteJumpEnabled = true
+		if Value then
+			InfiniteJumpEnabled = true
+		elseif not Value then
+			InfiniteJumpEnabled = false
+		end
 		uis.JumpRequest:Connect(function()
 			if InfiniteJumpEnabled then
 				character:FindFirstChildOfClass("Humanoid"):ChangeState("Jumping")
