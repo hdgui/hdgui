@@ -119,17 +119,28 @@ local SpinToggle = MovementTab:CreateToggle({
 		-- The function that takes place when the toggle is pressed
 		-- The variable (Value) is a boolean on whether the toggle is true or false
 		power = 5000 -- change this to make it more or less powerful
-
-		game:GetService('RunService').Stepped:connect(function()
-			game.Players.LocalPlayer.Character.Head.CanCollide = false
-			game.Players.LocalPlayer.Character.UpperTorso.CanCollide = false
-			game.Players.LocalPlayer.Character.LowerTorso.CanCollide = false
-			game.Players.LocalPlayer.Character.HumanoidRootPart.CanCollide = false
-		end)
-		wait(.1)
-		local thrust = Instance.new("BodyThrust")
-		thrust.Parent = game.Players.LocalPlayer.Character.HumanoidRootPart
-		thurst.Force = Vector3.new(power,0,power)
-		thurst.Location = game.Players.LocalPlayer.Character.HumanoidRootPart.Position
+		
+		if Value == true then
+			game:GetService('RunService').Stepped:connect(function()
+				game.Players.LocalPlayer.Character.Head.CanCollide = false
+				game.Players.LocalPlayer.Character.UpperTorso.CanCollide = false
+				game.Players.LocalPlayer.Character.LowerTorso.CanCollide = false
+				game.Players.LocalPlayer.Character.HumanoidRootPart.CanCollide = false
+			end)
+			wait(.1)
+			local thrust = Instance.new("BodyThrust")
+			thrust.Parent = game.Players.LocalPlayer.Character.HumanoidRootPart
+			thrust.Force = Vector3.new(power,0,power)
+			thrust.Location = game.Players.LocalPlayer.Character.HumanoidRootPart.Position
+		else
+			game:GetService('RunService').Stepped:connect(function()
+				game.Players.LocalPlayer.Character.Head.CanCollide = false
+				game.Players.LocalPlayer.Character.UpperTorso.CanCollide = true
+				game.Players.LocalPlayer.Character.LowerTorso.CanCollide = true
+				game.Players.LocalPlayer.Character.HumanoidRootPart.CanCollide = true
+			end)
+			wait(.1)
+			game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.BodyThrust:Destroy()
+		end
 	end,
 })
