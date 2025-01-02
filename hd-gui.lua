@@ -19,7 +19,7 @@ local Window = Rayfield:CreateWindow({
 	Name = "HD-GUI",
 	Icon = 0, -- Icon in Topbar. Can use Lucide Icons (string) or Roblox Image (number). 0 to use no icon (default).
 	LoadingTitle = "HD-GUI",
-	LoadingSubtitle = "Loading HD-GUI... (drn:001)",
+	LoadingSubtitle = "Loading HD-GUI... (drn:002)",
 	Theme = "Default", -- Check https://docs.sirius.menu/rayfield/configuration/themes
 
 	DisableRayfieldPrompts = false,
@@ -133,29 +133,6 @@ local InfiniteJumpToggle = MovementTab:CreateToggle({
 	end,
 })
 
-local swimConnection = nil
-
-local SwimToggle = MovementTab:CreateToggle({
-	Name = "Swim",
-	CurrentValue = false,
-	Flag = "SwimToggle", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
-	Callback = function(Value)
-		if Value then
-			-- Connect the JumpRequest event and store the connection
-			local humanoid = character:FindFirstChildOfClass("Humanoid")
-			if humanoid and humanoid:GetState() ~= Enum.HumanoidStateType.Swimming then
-				humanoid:ChangeState(Enum.HumanoidStateType.Swimming)
-			end
-		else
-			-- Disconnect the JumpRequest connection when toggled off
-			if swimConnection then
-				swimConnection:Disconnect()
-				swimConnection = nil
-			end
-		end
-	end,
-})
-
 -- Handling character respawn while Infinite Jump is enabled
 player.CharacterAdded:Connect(function(char)
 	character = char
@@ -220,5 +197,13 @@ local SpinToggle = MovementTab:CreateToggle({
 	end,
 })
 
-local PlayersTab = Window:CreateTab("Players", 0) -- Title, Image
-local PlayersIDKSection = PlayersTab:CreateSection("uhh idk")
+local HDGUITab = Window:CreateTab("HD-GUI", 0) -- Title, Image
+local HDGUIRemoveSection = HDGUITab:CreateSection("Remove")
+
+local Button = HDGUITab:CreateButton({
+	Name = "Remove HD-GUI",
+	Callback = function()
+		-- The function that takes place when the button is pressed
+		Rayfield:Destroy()
+	end,
+})
