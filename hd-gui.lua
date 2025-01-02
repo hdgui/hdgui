@@ -141,7 +141,7 @@ local SpinToggle = MovementTab:CreateToggle({
 			thrust.Location = game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.Position
 			Value = true
 		elseif not Value then
-			Rayfield:No2tify({
+			Rayfield:Notify({
 				Title = "false",
 				Content = "Notification Content",
 				Duration = 6.5,
