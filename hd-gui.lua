@@ -1,4 +1,4 @@
-local din = "998"
+local din = "000"
 
 local players = game:GetService("Players")
 local workspace = game:GetService("Workspace")
@@ -231,7 +231,7 @@ local FlyInput = MovementTab:CreateInput({
 		
 		if flyspeed then
 			_G.StartFly = Text
-			if _G.StartFly then
+			if _G.StartFly == "0" or _G.StartFly == "+0" or string.find(flyspeed, "-") then
 				if game.Players.LocalPlayer.Character and game.Players.LocalPlayer.Character:FindFirstChildOfClass("Humanoid") and game.Players.LocalPlayer.Character.Humanoid.RootPart and game.Players.LocalPlayer.Character.HumanoidRootPart:FindFirstChild("VelocityHandler") and game.Players.LocalPlayer.Character.HumanoidRootPart:FindFirstChild("GyroHandler") then
 					game.Players.LocalPlayer.Character.HumanoidRootPart.VelocityHandler:Destroy()
 					game.Players.LocalPlayer.Character.HumanoidRootPart.GyroHandler:Destroy()
@@ -243,7 +243,7 @@ local FlyInput = MovementTab:CreateInput({
 					game.Players.LocalPlayer.Character.HumanoidRootPart.VelocityHandler.MaxForce = Vector3.new(9e9,9e9,9e9)
 					game.Players.LocalPlayer.Character.HumanoidRootPart.GyroHandler.MaxTorque = Vector3.new(9e9,9e9,9e9)
 					game.Players.LocalPlayer.Character.Humanoid.PlatformStand = true
-					game.Players.LocalPlayer.Character.HumanoidRootPart.GyroHandler.CFrame = Workspace.CurrentCamera.CoordinateFrame
+					game.Players.LocalPlayer.Character.HumanoidRootPart.GyroHandler.CFrame = workspace.CurrentCamera.CoordinateFrame
 					game.Players.LocalPlayer.Character.HumanoidRootPart.VelocityHandler.Velocity = Vector3.new()
 					if require(game.Players.LocalPlayer.PlayerScripts:WaitForChild("PlayerModule"):WaitForChild("ControlModule")):GetMoveVector().X > 0 then
 						game.Players.LocalPlayer.Character.HumanoidRootPart.VelocityHandler.Velocity = game.Players.LocalPlayer.Character.HumanoidRootPart.VelocityHandler.Velocity + game.Workspace.CurrentCamera.CFrame.RightVector * (require(game.Players.LocalPlayer.PlayerScripts:WaitForChild("PlayerModule"):WaitForChild("ControlModule")):GetMoveVector().X * Text)
