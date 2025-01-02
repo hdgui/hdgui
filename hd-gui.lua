@@ -20,7 +20,7 @@ local Window = Rayfield:CreateWindow({
 	Name = "HD-GUI",
 	Icon = 0, -- Icon in Topbar. Can use Lucide Icons (string) or Roblox Image (number). 0 to use no icon (default).
 	LoadingTitle = "HD-GUI",
-	LoadingSubtitle = "Loading HD-GUI... (drn:003)",
+	LoadingSubtitle = "Loading HD-GUI... (din:000)",
 	Theme = "Default", -- Check https://docs.sirius.menu/rayfield/configuration/themes
 
 	DisableRayfieldPrompts = false,
@@ -199,8 +199,8 @@ local SpinToggle = MovementTab:CreateToggle({
 })
 
 local flying = false
-local speed = 50 -- Speed of flying
-local flyUpForce = 25 -- Upward force for flying
+local speed = 50 -- Horizontal speed while flying
+local verticalSpeed = 30 -- Vertical speed for flying up and down
 
 local bodyGyro = nil
 local bodyVelocity = nil
@@ -209,30 +209,45 @@ local function startFlying()
 	if not flying then
 		flying = true
 
-		-- Create BodyGyro to prevent the character from spinning
+		-- Create BodyGyro to stabilize the character's rotation
 		bodyGyro = Instance.new("BodyGyro")
 		bodyGyro.MaxTorque = Vector3.new(400000, 400000, 400000)
 		bodyGyro.CFrame = hrp.CFrame
 		bodyGyro.Parent = hrp
 
-		-- Create BodyVelocity to apply movement and upward force
+		-- Create BodyVelocity to control movement and upward force
 		bodyVelocity = Instance.new("BodyVelocity")
 		bodyVelocity.MaxForce = Vector3.new(400000, 400000, 400000)
-		bodyVelocity.Velocity = Vector3.new(0, flyUpForce, 0) -- Apply upward force initially
+		bodyVelocity.Velocity = Vector3.new(0, verticalSpeed, 0) -- Initial upward force
 		bodyVelocity.Parent = hrp
 
-		-- Maintain movement in the air
-		uis.InputChanged:Connect(function(input)
-			if flying then
+		-- Listen for input to control movement while flying
+		uis.InputChanged:Connect(function(input, gameProcessed)
+			if flying and not gameProcessed then
 				local moveDirection = Vector3.new(0, 0, 0)
 
-				if input.UserInputType == Enum.UserInputType.MouseMovement then
-					local mousePosition = uis:GetMouseLocation()
-					-- You can use the mouse to guide the direction if needed
+				-- Move forward and backward based on W/S or arrow keys
+				if input.UserInputType == Enum.UserInputType.Keyboard then
+					if input.KeyCode == Enum.KeyCode.W then
+						moveDirection = moveDirection + hrp.CFrame.LookVector
+					elseif input.KeyCode == Enum.KeyCode.S then
+						moveDirection = moveDirection - hrp.CFrame.LookVector
+					elseif input.KeyCode == Enum.KeyCode.A then
+						moveDirection = moveDirection - hrp.CFrame.RightVector
+					elseif input.KeyCode == Enum.KeyCode.D then
+						moveDirection = moveDirection + hrp.CFrame.RightVector
+					end
 				end
 
-				-- Update body velocity to simulate movement in the air
-				bodyVelocity.Velocity = Vector3.new(moveDirection.X, bodyVelocity.Velocity.Y, moveDirection.Z) + hrp.Velocity * 0.5
+				-- Apply horizontal movement (WASD controls)
+				bodyVelocity.Velocity = Vector3.new(moveDirection.X * speed, bodyVelocity.Velocity.Y, moveDirection.Z * speed)
+			end
+		end)
+
+		-- Maintain the upward force
+		game:GetService("RunService").Heartbeat:Connect(function()
+			if flying then
+				bodyVelocity.Velocity = Vector3.new(bodyVelocity.Velocity.X, verticalSpeed, bodyVelocity.Velocity.Z)
 			end
 		end)
 	end
@@ -242,7 +257,7 @@ local function stopFlying()
 	if flying then
 		flying = false
 
-		-- Remove BodyGyro and BodyVelocity to stop flying
+		-- Destroy BodyGyro and BodyVelocity to stop flying
 		if bodyGyro then
 			bodyGyro:Destroy()
 			bodyGyro = nil
