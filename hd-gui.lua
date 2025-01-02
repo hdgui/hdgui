@@ -106,7 +106,7 @@ local InfiniteJumpToggle = MovementTab:CreateToggle({
 				end)
 			end
 		else
-			
+
 		end
 	end,
 })
@@ -119,7 +119,7 @@ local SpinToggle = MovementTab:CreateToggle({
 		-- The function that takes place when the toggle is pressed
 		-- The variable (Value) is a boolean on whether the toggle is true or false
 		power = 5000 -- change this to make it more or less powerful
-		
+
 		--[[game:GetService('RunService').Stepped:connect(function()
 			game.Players.LocalPlayer.Character.Head.CanCollide = false
 			game.Players.LocalPlayer.Character.UpperTorso.CanCollide = false
@@ -127,26 +127,14 @@ local SpinToggle = MovementTab:CreateToggle({
 			game.Players.LocalPlayer.Character.HumanoidRootPart.CanCollide = false
 		end)
 		wait(.1)]]--
-		
+
 		if Value then
-			Rayfield:Notify({
-				Title = "true",
-				Content = "Notification Content",
-				Duration = 6.5,
-				Image = 4483362458,
-			})
 			local thrust = Instance.new("BodyThrust")
 			thrust.Parent = game:GetService("Players").LocalPlayer.Character.HumanoidRootPart
 			thrust.Force = Vector3.new(power,0,power)
 			thrust.Location = game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.Position
 			Value = true
 		elseif not Value then
-			Rayfield:Notify({
-				Title = "false",
-				Content = "Notification Content",
-				Duration = 6.5,
-				Image = 4483362458,
-			})
 			game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.BodyThrust:Destroy()
 			Value = false
 		end
