@@ -1,4 +1,4 @@
-local din = "049"
+local din = "101"
 
 local players = game:GetService("Players")
 local workspace = game:GetService("Workspace")
@@ -127,7 +127,8 @@ local GravityInput = MovementTab:CreateInput({
 local MovementModificationsSection = MovementTab:CreateSection("Modifications")
 
 -- Declare jumpConnection outside the callback to maintain its state
-local jumpConnection = nil
+local infJump
+infJumpDebounce = false
 
 local InfiniteJumpToggle = MovementTab:CreateToggle({
 	Name = "Infinite Jump",
@@ -136,24 +137,26 @@ local InfiniteJumpToggle = MovementTab:CreateToggle({
 	Callback = function(Value)
 		if Value then
 			-- Connect the JumpRequest event and store the connection
-			jumpConnection = uis.JumpRequest:Connect(function()
-				local humanoid = character:FindFirstChildOfClass("Humanoid")
-				if humanoid and humanoid:GetState() ~= Enum.HumanoidStateType.Jumping then
-					humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+			if infJump then infJump:Disconnect() end
+			infJumpDebounce = false
+			infJump = uis.JumpRequest:Connect(function()
+				if not infJumpDebounce then
+					infJumpDebounce = true
+					player.Character:FindFirstChildWhichIsA("Humanoid"):ChangeState(Enum.HumanoidStateType.Jumping)
+					wait()
+					infJumpDebounce = false
 				end
 			end)
 		else
 			-- Disconnect the JumpRequest connection when toggled off
-			if jumpConnection then
-				jumpConnection:Disconnect()
-				jumpConnection = nil
-			end
+			if infJump then infJump:Disconnect() end
+			infJumpDebounce = false
 		end
 	end,
 })
 
 -- Handling character respawn while Infinite Jump is enabled
-player.CharacterAdded:Connect(function(char)
+--[[player.CharacterAdded:Connect(function(char)
 	character = char
 	hrp = character:WaitForChild("HumanoidRootPart")
 	if InfiniteJumpToggle:Get() then
@@ -167,7 +170,7 @@ player.CharacterAdded:Connect(function(char)
 			end)
 		end
 	end
-end)
+end)]]--
 
 local SpinToggle = MovementTab:CreateToggle({
 	Name = "Spin",
