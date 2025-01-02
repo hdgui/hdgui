@@ -1,13 +1,14 @@
-local din = "000"
+local din = "001"
 
 local players = game:GetService("Players")
 local workspace = game:GetService("Workspace")
 local uis = game:GetService("UserInputService")
-local runService = game:GetService("RunService")
+local rs = game:GetService("RunService")
 
 local player = players.LocalPlayer
 local character = player.Character or player.CharacterAdded:Wait()
 local hrp = character:WaitForChild("HumanoidRootPart")
+local camera = game.Workspace.CurrentCamera
 local mouse = player:GetMouse()
 
 -- Listen for character respawns to update references
@@ -171,7 +172,7 @@ local SpinToggle = MovementTab:CreateToggle({
 			thrust.Location = hrp.Position
 
 			-- Disable collisions for specific body parts
-			collisionConnection = runService.Stepped:Connect(function()
+			collisionConnection = rs.Stepped:Connect(function()
 				local characterParts = {
 					character.Head,
 					character.UpperTorso,
@@ -201,97 +202,32 @@ local SpinToggle = MovementTab:CreateToggle({
 })
 
 local flying = false
-local speed = 50 -- Horizontal speed while flying
-local verticalSpeed = 30 -- Vertical speed for flying up and down
+local speed = 0.5
 
-local bodyGyro = nil
-local bodyVelocity = nil
+local bp = Instance.new("BodyPosition", hrp)
+bp.MaxForce = Vector3.new()
+bp.D = 10
+bp.P = 10000
 
-local verticalVelocity = 0
-local horizontalVelocity = Vector3.new(0, 0, 0)
+local bg = Instance.new("BodyGyro", hrp)
+bg.MaxTorque = Vector3.new()
+bg.D = 10
 
-local function startFlying()
-	if not flying then
-		flying = true
-
-		-- Create BodyGyro to stabilize the character's rotation
-		bodyGyro = Instance.new("BodyGyro")
-		bodyGyro.MaxTorque = Vector3.new(400000, 400000, 400000)
-		bodyGyro.CFrame = hrp.CFrame
-		bodyGyro.Parent = hrp
-
-		-- Create BodyVelocity to control movement and upward force
-		bodyVelocity = Instance.new("BodyVelocity")
-		bodyVelocity.MaxForce = Vector3.new(400000, 400000, 400000)
-		bodyVelocity.Velocity = Vector3.new(0, 0, 0) -- Start with no vertical or horizontal movement
-		bodyVelocity.Parent = hrp
-
-		-- Listen for input to control movement while flying
-		uis.InputChanged:Connect(function(input, gameProcessed)
-			if flying and not gameProcessed then
-				local moveDirection = Vector3.new(0, 0, 0)
-
-				-- Move forward and backward based on W/S or arrow keys
-				if input.UserInputType == Enum.UserInputType.Keyboard then
-					if input.KeyCode == Enum.KeyCode.W then
-						moveDirection = moveDirection + hrp.CFrame.LookVector
-					elseif input.KeyCode == Enum.KeyCode.S then
-						moveDirection = moveDirection - hrp.CFrame.LookVector
-					elseif input.KeyCode == Enum.KeyCode.A then
-						moveDirection = moveDirection - hrp.CFrame.RightVector
-					elseif input.KeyCode == Enum.KeyCode.D then
-						moveDirection = moveDirection + hrp.CFrame.RightVector
-					end
-				end
-
-				-- Apply horizontal movement (WASD controls)
-				horizontalVelocity = moveDirection * speed
-			end
-		end)
-
-		-- Listen for Q and E to move up and down
-		uis.InputBegan:Connect(function(input, gameProcessed)
-			if flying and not gameProcessed then
-				if input.KeyCode == Enum.KeyCode.Q then
-					verticalVelocity = -verticalSpeed -- Move down when Q is pressed
-				elseif input.KeyCode == Enum.KeyCode.E then
-					verticalVelocity = verticalSpeed -- Move up when E is pressed
-				end
-			end
-		end)
-
-		uis.InputEnded:Connect(function(input)
-			if flying then
-				if input.KeyCode == Enum.KeyCode.Q or input.KeyCode == Enum.KeyCode.E then
-					verticalVelocity = 0 -- Stop vertical movement when Q or E is released
-				end
-			end
-		end)
-
-		-- Maintain the upward force and horizontal velocity
-		game:GetService("RunService").Heartbeat:Connect(function()
-			if flying then
-				-- Apply both horizontal and vertical velocity
-				bodyVelocity.Velocity = Vector3.new(horizontalVelocity.X, verticalVelocity, horizontalVelocity.Z)
-			end
-		end)
+function fly()
+	flying = true
+	bp.MaxForce = Vector3.new(400000,400000,400000)
+	bg.MaxTorque = Vector3.new(400000,400000,400000)
+	while flying do
+		rs.RenderStepped:wait()
+		bp.Position = hrp.Position +((hrp.Position - camera.CFrame.p).unit * speed)
+		bg.CFrame = CFrame.new(camera.CFrame.p, hrp.Position)
 	end
 end
 
-local function stopFlying()
-	if flying then
-		flying = false
-
-		-- Destroy BodyGyro and BodyVelocity to stop flying
-		if bodyGyro then
-			bodyGyro:Destroy()
-			bodyGyro = nil
-		end
-		if bodyVelocity then
-			bodyVelocity:Destroy()
-			bodyVelocity = nil
-		end
-	end
+function endFlying()
+	bp.MaxForce = Vector3.new()
+	bg.MaxTorque = Vector3.new()
+	flying = false
 end
 
 local FlyToggle = MovementTab:CreateToggle({
@@ -302,11 +238,9 @@ local FlyToggle = MovementTab:CreateToggle({
 		-- The function that takes place when the toggle is pressed
 		-- The variable (Value) is a boolean on whether the toggle is true or false
 		if Value then
-			startFlying()
-			Value = true
+			fly()
 		else
-			stopFlying()
-			Value = false
+			endFlying()
 		end
 	end,
 })
