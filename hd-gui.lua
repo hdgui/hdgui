@@ -1,4 +1,4 @@
-local din = "101"
+local din = "hope for fly"
 
 local players = game:GetService("Players")
 local workspace = game:GetService("Workspace")
@@ -201,34 +201,7 @@ local SpinToggle = MovementTab:CreateToggle({
 	end,
 })
 
-local flying = false
-local speed = 0.5
-
-local bp = Instance.new("BodyPosition", hrp)
-bp.MaxForce = Vector3.new()
-bp.D = 10
-bp.P = 10000
-
-local bg = Instance.new("BodyGyro", hrp)
-bg.MaxTorque = Vector3.new()
-bg.D = 10
-
-function fly()
-	flying = true
-	bp.MaxForce = Vector3.new(400000,400000,400000)
-	bg.MaxTorque = Vector3.new(400000,400000,400000)
-	while flying do
-		rs.RenderStepped:wait()
-		bp.Position = hrp.Position +((hrp.Position - camera.CFrame.p).unit * speed)
-		bg.CFrame = CFrame.new(camera.CFrame.p, hrp.Position)
-	end
-end
-
-function endFlying()
-	bp.MaxForce = Vector3.new()
-	bg.MaxTorque = Vector3.new()
-	flying = false
-end
+_G.SetSpeedFly = 5
 
 local FlyToggle = MovementTab:CreateToggle({
 	Name = "Fly",
@@ -237,15 +210,50 @@ local FlyToggle = MovementTab:CreateToggle({
 	Callback = function(Value)
 		-- The function that takes place when the toggle is pressed
 		-- The variable (Value) is a boolean on whether the toggle is true or false
-		uis.InputBegan:connect(function(input)
-			if input.KeyCode == Enum.KeyCode.W then
-				if Value then
-					fly()
-				else
-					endFlying()
-				end
+		_G.StartFly = Value
+		if _G.StartFly == false then
+			if game.Players.LocalPlayer.Character and game.Players.LocalPlayer.Character:FindFirstChildOfClass("Humanoid") and game.Players.LocalPlayer.Character.Humanoid.RootPart and game.Players.LocalPlayer.Character.HumanoidRootPart:FindFirstChild("VelocityHandler") and game.Players.LocalPlayer.Character.HumanoidRootPart:FindFirstChild("GyroHandler") then
+				game.Players.LocalPlayer.Character.HumanoidRootPart.VelocityHandler:Destroy()
+				game.Players.LocalPlayer.Character.HumanoidRootPart.GyroHandler:Destroy()
+				game.Players.LocalPlayer.Character.Humanoid.PlatformStand = false
 			end
-		end)
+		end
+		while _G.StartFly do
+			if game.Players.LocalPlayer.Character and game.Players.LocalPlayer.Character:FindFirstChildOfClass("Humanoid") and game.Players.LocalPlayer.Character.Humanoid.RootPart and game.Players.LocalPlayer.Character.HumanoidRootPart:FindFirstChild("VelocityHandler") and game.Players.LocalPlayer.Character.HumanoidRootPart:FindFirstChild("GyroHandler") then
+				game.Players.LocalPlayer.Character.HumanoidRootPart.VelocityHandler.MaxForce = Vector3.new(9e9,9e9,9e9)
+				game.Players.LocalPlayer.Character.HumanoidRootPart.GyroHandler.MaxTorque = Vector3.new(9e9,9e9,9e9)
+				game.Players.LocalPlayer.Character.Humanoid.PlatformStand = true
+				game.Players.LocalPlayer.Character.HumanoidRootPart.GyroHandler.CFrame = Workspace.CurrentCamera.CoordinateFrame
+				game.Players.LocalPlayer.Character.HumanoidRootPart.VelocityHandler.Velocity = Vector3.new()
+				if require(game.Players.LocalPlayer.PlayerScripts:WaitForChild("PlayerModule"):WaitForChild("ControlModule")):GetMoveVector().X > 0 then
+					game.Players.LocalPlayer.Character.HumanoidRootPart.VelocityHandler.Velocity = game.Players.LocalPlayer.Character.HumanoidRootPart.VelocityHandler.Velocity + game.Workspace.CurrentCamera.CFrame.RightVector * (require(game.Players.LocalPlayer.PlayerScripts:WaitForChild("PlayerModule"):WaitForChild("ControlModule")):GetMoveVector().X * _G.SetSpeedFly)
+				end
+				if require(game.Players.LocalPlayer.PlayerScripts:WaitForChild("PlayerModule"):WaitForChild("ControlModule")):GetMoveVector().X < 0 then
+					game.Players.LocalPlayer.Character.HumanoidRootPart.VelocityHandler.Velocity = game.Players.LocalPlayer.Character.HumanoidRootPart.VelocityHandler.Velocity + game.Workspace.CurrentCamera.CFrame.RightVector * (require(game.Players.LocalPlayer.PlayerScripts:WaitForChild("PlayerModule"):WaitForChild("ControlModule")):GetMoveVector().X * _G.SetSpeedFly)
+				end
+				if require(game.Players.LocalPlayer.PlayerScripts:WaitForChild("PlayerModule"):WaitForChild("ControlModule")):GetMoveVector().Z > 0 then
+					game.Players.LocalPlayer.Character.HumanoidRootPart.VelocityHandler.Velocity = game.Players.LocalPlayer.Character.HumanoidRootPart.VelocityHandler.Velocity - game.Workspace.CurrentCamera.CFrame.LookVector * (require(game.Players.LocalPlayer.PlayerScripts:WaitForChild("PlayerModule"):WaitForChild("ControlModule")):GetMoveVector().Z * _G.SetSpeedFly)
+				end
+				if require(game.Players.LocalPlayer.PlayerScripts:WaitForChild("PlayerModule"):WaitForChild("ControlModule")):GetMoveVector().Z < 0 then
+					game.Players.LocalPlayer.Character.HumanoidRootPart.VelocityHandler.Velocity = game.Players.LocalPlayer.Character.HumanoidRootPart.VelocityHandler.Velocity - game.Workspace.CurrentCamera.CFrame.LookVector * (require(game.Players.LocalPlayer.PlayerScripts:WaitForChild("PlayerModule"):WaitForChild("ControlModule")):GetMoveVector().Z * _G.SetSpeedFly)
+				end
+			elseif game.Players.LocalPlayer.Character and game.Players.LocalPlayer.Character:FindFirstChildOfClass("Humanoid") and game.Players.LocalPlayer.Character.Humanoid.RootPart and game.Players.LocalPlayer.Character.HumanoidRootPart:FindFirstChild("VelocityHandler") == nil and game.Players.LocalPlayer.Character.HumanoidRootPart:FindFirstChild("GyroHandler") == nil then
+				local bv = Instance.new("BodyVelocity")
+				local bg = Instance.new("BodyGyro")
+
+				bv.Name = "VelocityHandler"
+				bv.Parent = game.Players.LocalPlayer.Character.HumanoidRootPart
+				bv.MaxForce = Vector3.new(0,0,0)
+				bv.Velocity = Vector3.new(0,0,0)
+
+				bg.Name = "GyroHandler"
+				bg.Parent = game.Players.LocalPlayer.Character.HumanoidRootPart
+				bg.MaxTorque = Vector3.new(0,0,0)
+				bg.P = 1000
+				bg.D = 50
+			end
+			task.wait()
+		end   
 	end,
 })
 
