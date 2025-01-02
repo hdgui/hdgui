@@ -1,4 +1,4 @@
-local din = "048"
+local din = "049"
 
 local players = game:GetService("Players")
 local workspace = game:GetService("Workspace")
@@ -216,7 +216,7 @@ local SpinToggle = MovementTab:CreateToggle({
 	end,
 })
 
-_G.SetSpeedFly = 5
+_G.SetSpeedFly = 75
 
 local FlyToggle = MovementTab:CreateToggle({
 	Name = "Fly",
