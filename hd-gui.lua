@@ -13,14 +13,6 @@ player.CharacterAdded:Connect(function(char)
 	hrp = character:WaitForChild("HumanoidRootPart")
 end)
 
-local function getPlayerOptions()
-	local playerOptions = {"All"} -- Start with the "All" option
-	for _, player in ipairs(players:GetPlayers()) do
-		table.insert(playerOptions, player.Name) -- Add each player's name
-	end
-	return playerOptions
-end
-
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
 local Window = Rayfield:CreateWindow({
@@ -141,6 +133,30 @@ local InfiniteJumpToggle = MovementTab:CreateToggle({
 	end,
 })
 
+local swimConnection = nil
+
+local SwimToggle = MovementTab:CreateToggle({
+	Name = "Swim",
+	CurrentValue = false,
+	Flag = "SwimToggle", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+	Callback = function(Value)
+		if Value then
+			-- Connect the JumpRequest event and store the connection
+				local humanoid = character:FindFirstChildOfClass("Humanoid")
+				if humanoid and humanoid:GetState() ~= Enum.HumanoidStateType.Swimming then
+					humanoid:ChangeState(Enum.HumanoidStateType.Swimming)
+				end
+			end)
+		else
+			-- Disconnect the JumpRequest connection when toggled off
+			if swimConnection then
+				swimConnection:Disconnect()
+				swimConnection = nil
+			end
+		end
+	end,
+})
+
 -- Handling character respawn while Infinite Jump is enabled
 player.CharacterAdded:Connect(function(char)
 	character = char
@@ -207,24 +223,3 @@ local SpinToggle = MovementTab:CreateToggle({
 
 local PlayersTab = Window:CreateTab("Players", 0) -- Title, Image
 local PlayersIDKSection = PlayersTab:CreateSection("uhh idk")
-
-local Dropdown = PlayersTab:CreateDropdown({
-	Name = "Player Selection",
-	Options = getPlayerOptions(), -- Dynamically fetch the player options
-	CurrentOption = {"All"},
-	MultipleOptions = true,
-	Flag = "Dropdown1", -- Ensure the flag is unique
-	Callback = function(Options)
-		-- The function that takes place when the selected option is changed
-		-- The variable (Options) is a table of strings for the current selected options
-		print("Selected option:", Options)
-	end,
-})
-
-players.PlayerAdded:Connect(function()
-	Dropdown:Set(getPlayerOptions()) -- Update the dropdown with new player list
-end)
-
-players.PlayerRemoving:Connect(function()
-	Dropdown:Set(getPlayerOptions()) -- Update the dropdown with new player list
-end)
