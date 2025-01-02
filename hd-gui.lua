@@ -1,4 +1,4 @@
-local din = "101"
+local din = "123"
 
 local players = game:GetService("Players")
 local workspace = game:GetService("Workspace")
@@ -10,6 +10,11 @@ local character = player.Character or player.CharacterAdded:Wait()
 local hrp = character:WaitForChild("HumanoidRootPart")
 local camera = game.Workspace.CurrentCamera
 local mouse = player:GetMouse()
+
+function getRoot(char)
+	local rootPart = char:FindFirstChild('HumanoidRootPart') or char:FindFirstChild('Torso') or char:FindFirstChild('UpperTorso')
+	return rootPart
+end
 
 -- Listen for character respawns to update references
 player.CharacterAdded:Connect(function(char)
@@ -177,43 +182,25 @@ local SpinToggle = MovementTab:CreateToggle({
 	CurrentValue = false,
 	Flag = "SpinToggle", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
 	Callback = function(Value)
-		local power = 5000 -- Modify this to adjust the spin force
-
-		local collisionConnection = nil -- Store the connection for cleanup
+		local power = 500 -- Modify this to adjust the spin force
 
 		if Value then
-			-- Add BodyThrust for spinning
-			local thrust = Instance.new("BodyThrust")
-			thrust.Name = "SpinThrust"
-			thrust.Parent = hrp
-			thrust.Force = Vector3.new(power, 0, power)
-			thrust.Location = hrp.Position
-
-			-- Disable collisions for specific body parts
-			collisionConnection = rs.Stepped:Connect(function()
-				local characterParts = {
-					character.Head,
-					character.UpperTorso,
-					character.LowerTorso,
-					character.HumanoidRootPart
-				}
-				for _, part in ipairs(characterParts) do
-					if part then
-						part.CanCollide = false
-					end
+			local spinSpeed = power
+			for i,v in pairs(getRoot(player.Character):GetChildren()) do
+				if v.Name == "Spinning" then
+					v:Destroy()
 				end
-			end)
-		else
-			-- Remove BodyThrust
-			local thrust = hrp:FindFirstChild("SpinThrust")
-			if thrust then
-				thrust:Destroy()
 			end
-
-			-- Disconnect collision disabling event
-			if collisionConnection then
-				collisionConnection:Disconnect()
-				collisionConnection = nil
+			local Spin = Instance.new("BodyAngularVelocity")
+			Spin.Name = "Spinning"
+			Spin.Parent = getRoot(player.Character)
+			Spin.MaxTorque = Vector3.new(0, math.huge, 0)
+			Spin.AngularVelocity = Vector3.new(0,spinSpeed,0)
+		else
+			for i,v in pairs(getRoot(player.Character):GetChildren()) do
+				if v.Name == "Spinning" then
+					v:Destroy()
+				end
 			end
 		end
 	end,
