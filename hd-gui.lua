@@ -1,10 +1,17 @@
+local players = game:GetService("Players")
+local workspace = game:GetService("Workspace")
+local uis = game:GetService("UserInputService")
+
+local player = players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait() 
+
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
 local Window = Rayfield:CreateWindow({
 	Name = "HD-GUI",
 	Icon = 0, -- Icon in Topbar. Can use Lucide Icons (string) or Roblox Image (number). 0 to use no icon (default).
 	LoadingTitle = "HD-GUI",
-	LoadingSubtitle = "by david, made with rayfield",
+	LoadingSubtitle = "DIN-1",
 	Theme = "Default", -- Check https://docs.sirius.menu/rayfield/configuration/themes
 
 	DisableRayfieldPrompts = false,
@@ -46,7 +53,7 @@ local WalkSpeedInput = MovementTab:CreateInput({
 	Callback = function(Text)
 		-- The function that takes place when the input is changed
 		-- The variable (Text) is a string for the value in the text box
-		game:GetService("Players").LocalPlayer.Character.Humanoid.WalkSpeed = Text
+		character.Humanoid.WalkSpeed = Text
 	end,
 })
 
@@ -59,7 +66,7 @@ local JumpPowerInput = MovementTab:CreateInput({
 	Callback = function(Text)
 		-- The function that takes place when the input is changed
 		-- The variable (Text) is a string for the value in the text box
-		game:GetService("Players").LocalPlayer.Character.Humanoid.JumpPower = Text
+		character.Humanoid.JumpPower = Text
 	end,
 })
 
@@ -72,7 +79,7 @@ local GravityInput = MovementTab:CreateInput({
 	Callback = function(Text)
 		-- The function that takes place when the input is changed
 		-- The variable (Text) is a string for the value in the text box
-		game:GetService("Workspace").Gravity = Text
+		workspace.Gravity = Text
 	end,
 })
 
@@ -82,32 +89,15 @@ local InfiniteJumpToggle = MovementTab:CreateToggle({
 	Name = "Infinite Jump",
 	CurrentValue = false,
 	Flag = "InfiniteJumpToggle", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
-	Callback = function(Value)
+	Callback = function(InfiniteJumpEnabled)
 		-- The function that takes place when the toggle is pressed
 		-- The variable (Value) is a boolean on whether the toggle is true or false
-
-		if Value == true then
-			if _G.infinJumpStarted == nil then
-				--Ensures this only runs once to save resources
-				_G.infinJumpStarted = true
-
-				--The actual infinite jump
-				local plr = game:GetService('Players').LocalPlayer
-				local m = plr:GetMouse()
-				m.KeyDown:connect(function(k)
-					if _G.infinjump then
-						if k:byte() == 32 then
-							humanoid = game:GetService'Players'.LocalPlayer.Character:FindFirstChildOfClass('Humanoid')
-							humanoid:ChangeState('Jumping')
-							wait()
-							humanoid:ChangeState('Seated')
-						end
-					end
-				end)
+		local InfiniteJumpEnabled = true
+		uis.JumpRequest:Connect(function()
+			if InfiniteJumpEnabled then
+				character:FindFirstChildOfClass("Humanoid"):ChangeState("Jumping")
 			end
-		else
-
-		end
+		end)
 	end,
 })
 
@@ -130,12 +120,12 @@ local SpinToggle = MovementTab:CreateToggle({
 
 		if Value then
 			local thrust = Instance.new("BodyThrust")
-			thrust.Parent = game:GetService("Players").LocalPlayer.Character.HumanoidRootPart
+			thrust.Parent = character.HumanoidRootPart
 			thrust.Force = Vector3.new(power,0,power)
-			thrust.Location = game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.Position
+			thrust.Location = character.HumanoidRootPart.Position
 			Value = true
 		elseif not Value then
-			game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.BodyThrust:Destroy()
+			character.HumanoidRootPart.BodyThrust:Destroy()
 			Value = false
 		end
 	end,
