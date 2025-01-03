@@ -1,4 +1,4 @@
-local din = "71620"
+local din = "314"
 
 local players = game:GetService("Players")
 local workspace = game:GetService("Workspace")
@@ -212,6 +212,58 @@ local MovementModificationsFlySection = MovementTab:CreateSection("Modifications
 _G.SetSpeedFly = 100 -- Default speed
 _G.FlyKeybind = Enum.KeyCode.F -- Default keybind
 _G.StartFly = false -- Fly toggle state
+local flying = false -- Internal flying state
+
+local function stopFlying()
+	if game.Players.LocalPlayer.Character then
+		local rootPart = game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+		if rootPart then
+			local velocityHandler = rootPart:FindFirstChild("VelocityHandler")
+			local gyroHandler = rootPart:FindFirstChild("GyroHandler")
+			if velocityHandler then velocityHandler:Destroy() end
+			if gyroHandler then gyroHandler:Destroy() end
+			local humanoid = game.Players.LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+			if humanoid then
+				humanoid.PlatformStand = false
+			end
+		end
+	end
+	flying = false
+end
+
+local function startFlying()
+	if not _G.StartFly or flying then return end -- Ensure toggle is active and avoid re-initializing
+	if game.Players.LocalPlayer.Character then
+		local rootPart = game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+		local humanoid = game.Players.LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+		if rootPart and humanoid then
+			-- Create handlers if they don't exist
+			local velocityHandler = rootPart:FindFirstChild("VelocityHandler") or Instance.new("BodyVelocity", rootPart)
+			local gyroHandler = rootPart:FindFirstChild("GyroHandler") or Instance.new("BodyGyro", rootPart)
+
+			velocityHandler.Name = "VelocityHandler"
+			velocityHandler.MaxForce = Vector3.new(9e9, 9e9, 9e9)
+			velocityHandler.Velocity = Vector3.zero
+
+			gyroHandler.Name = "GyroHandler"
+			gyroHandler.MaxTorque = Vector3.new(9e9, 9e9, 9e9)
+			gyroHandler.P = 1000
+			gyroHandler.D = 50
+
+			humanoid.PlatformStand = true
+			flying = true
+
+			-- Flight loop
+			while flying do
+				local moveVector = require(game.Players.LocalPlayer.PlayerScripts:WaitForChild("PlayerModule"):WaitForChild("ControlModule")):GetMoveVector()
+				local camera = workspace.CurrentCamera
+				gyroHandler.CFrame = camera.CFrame
+				velocityHandler.Velocity = (camera.CFrame.RightVector * moveVector.X + camera.CFrame.LookVector * moveVector.Z) * _G.SetSpeedFly
+				task.wait()
+			end
+		end
+	end
+end
 
 local FlySpeedInput = MovementTab:CreateInput({
 	Name = "Fly Speed",
@@ -224,12 +276,7 @@ local FlySpeedInput = MovementTab:CreateInput({
 		if flyspeed and flyspeed > 0 then
 			_G.SetSpeedFly = flyspeed
 		else
-			Rayfield:Notify({
-				Title = "Invalid Input",
-				Content = "Please enter a number.",
-				Duration = 6.5,
-				Image = 0,
-			})
+			warn("Invalid fly speed entered. Please enter a positive number.")
 		end
 	end,
 })
@@ -251,61 +298,21 @@ local FlyToggle = MovementTab:CreateToggle({
 	Callback = function(Value)
 		_G.StartFly = Value
 		if not Value then
-			-- Disable fly mode by removing handlers
-			if character then
-				local rootPart = character:FindFirstChild("HumanoidRootPart")
-				if rootPart then
-					local velocityHandler = rootPart:FindFirstChild("VelocityHandler")
-					local gyroHandler = rootPart:FindFirstChild("GyroHandler")
-					if velocityHandler then velocityHandler:Destroy() end
-					if gyroHandler then gyroHandler:Destroy() end
-					local humanoid = game.Players.LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
-					if humanoid then
-						humanoid.PlatformStand = false
-					end
-				end
-			end
+			stopFlying()
 		end
 	end,
 })
 
 uis.InputBegan:Connect(function(input, gameProcessed)
-	if gameProcessed or not _G.StartFly then return end -- Ignore input if toggle is off or input is processed by game
+	if gameProcessed then return end -- Ignore input processed by the game
 
 	if input.KeyCode == _G.FlyKeybind then
-		-- Fly logic
-		local character = character
-		if character and character:FindFirstChild("HumanoidRootPart") then
-			local rootPart = character.HumanoidRootPart
-			local humanoid = character:FindFirstChildOfClass("Humanoid")
-
-			-- Ensure handlers exist
-			local velocityHandler = rootPart:FindFirstChild("VelocityHandler")
-			local gyroHandler = rootPart:FindFirstChild("GyroHandler")
-
-			if not velocityHandler then
-				velocityHandler = Instance.new("BodyVelocity", rootPart)
-				velocityHandler.Name = "VelocityHandler"
-				velocityHandler.MaxForce = Vector3.new(9e9, 9e9, 9e9)
+		if _G.StartFly then
+			if flying then
+				stopFlying()
+			else
+				startFlying()
 			end
-
-			if not gyroHandler then
-				gyroHandler = Instance.new("BodyGyro", rootPart)
-				gyroHandler.Name = "GyroHandler"
-				gyroHandler.MaxTorque = Vector3.new(9e9, 9e9, 9e9)
-				gyroHandler.P = 1000
-				gyroHandler.D = 50
-			end
-
-			if humanoid then
-				humanoid.PlatformStand = true
-			end
-
-			-- Control movement based on camera direction and input
-			local moveVector = require(game.Players.LocalPlayer.PlayerScripts:WaitForChild("PlayerModule"):WaitForChild("ControlModule")):GetMoveVector()
-			local camera = workspace.CurrentCamera
-			gyroHandler.CFrame = camera.CFrame
-			velocityHandler.Velocity = (camera.CFrame.RightVector * moveVector.X + camera.CFrame.LookVector * moveVector.Z) * _G.SetSpeedFly
 		end
 	end
 end)
