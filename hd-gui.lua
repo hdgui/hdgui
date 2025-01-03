@@ -1,4 +1,4 @@
-local din = "314"
+local din = "pee"
 
 local players = game:GetService("Players")
 local workspace = game:GetService("Workspace")
@@ -61,7 +61,7 @@ local Window = Rayfield:CreateWindow({
 local WelcomeTab = Window:CreateTab("Welcome", 0) -- Title, Image
 local WelcomeNoteSection = WelcomeTab:CreateSection("Notes")
 
-local Paragraph = WelcomeTab:CreateParagraph({Title = "Thank you for using HD-GUI!", Content = "Thanks for using HD-GUI! If you know what you are doing, feel free to skip this note. Everything should work in all games, but if something doesn’t, feel free to let us know on our Discord server (which currently does not exist). Since this GUI is made with Rayfield, you can click the settings icon in the top-right corner to change the key that opens and closes the GUI. HD-GUI is not responsible for any in-game or platform bans. If you’re reckless enough to use this on your main account and get banned, that’s entirely on you. Use an alternative account or face the consequences. Proudly made with Rayfield."})
+local Paragraph = WelcomeTab:CreateParagraph({Title = "Thank you for using HD-GUI!", Content = "Thanks for using HD-GUI! If you know what you are doing, feel free to skip this note. Everything should work in all games, but if something doesn’t, feel free to let us know on our Discord server (which currently does not exist). Since this GUI is made with Rayfield, you can click the settings icon in the top-right corner to change the key that opens and closes the GUI. <b>HD-GUI is not responsible for any in-game or platform bans. If you’re reckless enough to use this on your main account and get banned, that’s entirely on you. Use an alternative account or face the consequences.</b> Proudly made with Rayfield."})
 
 local MovementTab = Window:CreateTab("Movement", 0) -- Title, Image
 local MovementCharacterSection = MovementTab:CreateSection("Character")
@@ -209,37 +209,44 @@ local SpinToggle = MovementTab:CreateToggle({
 local MovementModificationsFlySection = MovementTab:CreateSection("Modifications - Fly")
 
 -- Variables to track state
-_G.SetSpeedFly = 100 -- Default speed
-_G.FlyKeybind = Enum.KeyCode.F -- Default keybind
-_G.StartFly = false -- Fly toggle state
-local flying = false -- Internal flying state
+_G.FlySpeed = 100
+_G.FlyKeybind = Enum.KeyCode.F
+_G.FlyEnabled = false
+local isFlying = false
 
+-- Function to stop flying
 local function stopFlying()
-	if game.Players.LocalPlayer.Character then
-		local rootPart = game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-		if rootPart then
-			local velocityHandler = rootPart:FindFirstChild("VelocityHandler")
-			local gyroHandler = rootPart:FindFirstChild("GyroHandler")
-			if velocityHandler then velocityHandler:Destroy() end
-			if gyroHandler then gyroHandler:Destroy() end
-			local humanoid = game.Players.LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+	if isFlying then
+		isFlying = false
+		local character = game.Players.LocalPlayer.Character
+		if character then
+			local rootPart = character:FindFirstChild("HumanoidRootPart")
+			local humanoid = character:FindFirstChildOfClass("Humanoid")
+			if rootPart then
+				local velocityHandler = rootPart:FindFirstChild("VelocityHandler")
+				local gyroHandler = rootPart:FindFirstChild("GyroHandler")
+				if velocityHandler then velocityHandler:Destroy() end
+				if gyroHandler then gyroHandler:Destroy() end
+			end
 			if humanoid then
 				humanoid.PlatformStand = false
 			end
 		end
 	end
-	flying = false
 end
 
+-- Function to start flying
 local function startFlying()
-	if not _G.StartFly or flying then return end -- Ensure toggle is active and avoid re-initializing
-	if game.Players.LocalPlayer.Character then
-		local rootPart = game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-		local humanoid = game.Players.LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+	if not _G.FlyEnabled or isFlying then return end
+	isFlying = true
+	local character = game.Players.LocalPlayer.Character
+	if character then
+		local rootPart = character:FindFirstChild("HumanoidRootPart")
+		local humanoid = character:FindFirstChildOfClass("Humanoid")
 		if rootPart and humanoid then
-			-- Create handlers if they don't exist
-			local velocityHandler = rootPart:FindFirstChild("VelocityHandler") or Instance.new("BodyVelocity", rootPart)
-			local gyroHandler = rootPart:FindFirstChild("GyroHandler") or Instance.new("BodyGyro", rootPart)
+			-- Create handlers
+			local velocityHandler = Instance.new("BodyVelocity", rootPart)
+			local gyroHandler = Instance.new("BodyGyro", rootPart)
 
 			velocityHandler.Name = "VelocityHandler"
 			velocityHandler.MaxForce = Vector3.new(9e9, 9e9, 9e9)
@@ -251,20 +258,23 @@ local function startFlying()
 			gyroHandler.D = 50
 
 			humanoid.PlatformStand = true
-			flying = true
 
 			-- Flight loop
-			while flying do
+			while isFlying and _G.FlyEnabled do
 				local moveVector = require(game.Players.LocalPlayer.PlayerScripts:WaitForChild("PlayerModule"):WaitForChild("ControlModule")):GetMoveVector()
 				local camera = workspace.CurrentCamera
 				gyroHandler.CFrame = camera.CFrame
-				velocityHandler.Velocity = (camera.CFrame.RightVector * moveVector.X + camera.CFrame.LookVector * moveVector.Z) * _G.SetSpeedFly
+				velocityHandler.Velocity = (camera.CFrame.RightVector * moveVector.X + camera.CFrame.LookVector * moveVector.Z) * _G.FlySpeed
 				task.wait()
 			end
+
+			-- Cleanup if flying stops
+			stopFlying()
 		end
 	end
 end
 
+-- Rayfield Fly Speed Input
 local FlySpeedInput = MovementTab:CreateInput({
 	Name = "Fly Speed",
 	CurrentValue = "100",
@@ -272,15 +282,16 @@ local FlySpeedInput = MovementTab:CreateInput({
 	RemoveTextAfterFocusLost = false,
 	Flag = "FlySpeedInput",
 	Callback = function(Text)
-		local flyspeed = tonumber(Text)
-		if flyspeed and flyspeed > 0 then
-			_G.SetSpeedFly = flyspeed
+		local speed = tonumber(Text)
+		if speed and speed > 0 then
+			_G.FlySpeed = speed
 		else
 			warn("Invalid fly speed entered. Please enter a positive number.")
 		end
 	end,
 })
 
+-- Rayfield Keybind Input
 local FlyKeybind = MovementTab:CreateKeybind({
 	Name = "Fly Keybind",
 	CurrentKeybind = "F",
@@ -291,24 +302,25 @@ local FlyKeybind = MovementTab:CreateKeybind({
 	end,
 })
 
+-- Rayfield Toggle for Fly
 local FlyToggle = MovementTab:CreateToggle({
 	Name = "Enable Fly",
 	CurrentValue = false,
 	Flag = "FlyToggle",
 	Callback = function(Value)
-		_G.StartFly = Value
+		_G.FlyEnabled = Value
 		if not Value then
 			stopFlying()
 		end
 	end,
 })
 
+-- Keybind Activation Logic
 uis.InputBegan:Connect(function(input, gameProcessed)
-	if gameProcessed then return end -- Ignore input processed by the game
-
+	if gameProcessed then return end
 	if input.KeyCode == _G.FlyKeybind then
-		if _G.StartFly then
-			if flying then
+		if _G.FlyEnabled then
+			if isFlying then
 				stopFlying()
 			else
 				startFlying()
