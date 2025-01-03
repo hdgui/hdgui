@@ -1,4 +1,5 @@
-local din = "pee"
+local din = "poo"
+local uniqueGameNumber = "0"
 
 local players = game:GetService("Players")
 local workspace = game:GetService("Workspace")
@@ -61,7 +62,9 @@ local Window = Rayfield:CreateWindow({
 local WelcomeTab = Window:CreateTab("Welcome", 0) -- Title, Image
 local WelcomeNoteSection = WelcomeTab:CreateSection("Notes")
 
-local Paragraph = WelcomeTab:CreateParagraph({Title = "Thank you for using HD-GUI!", Content = "Thanks for using HD-GUI! If you know what you are doing, feel free to skip this note. Everything should work in all games, but if something doesn’t, feel free to let us know on our Discord server (which currently does not exist). Since this GUI is made with Rayfield, you can click the settings icon in the top-right corner to change the key that opens and closes the GUI. <b>HD-GUI is not responsible for any in-game or platform bans. If you’re reckless enough to use this on your main account and get banned, that’s entirely on you. Use an alternative account or face the consequences.</b> Proudly made with Rayfield."})
+local WelcomeNote1Paragraph = WelcomeTab:CreateParagraph({Title = "Thank you for using HD-GUI!", Content = "Thanks for using HD-GUI! If you know what you are doing, feel free to skip this note. Everything should work in all games, but if something doesn’t, feel free to let us know on our Discord server (which currently does not exist). Since this GUI is made with Rayfield, you can click the settings icon in the top-right corner to change the key that opens and closes the GUI. <b>HD-GUI is not responsible for any in-game or platform bans. If you’re reckless enough to use this on your main account and get banned, that’s entirely on you. Use an alternative account or face the consequences.</b> Proudly made with Rayfield."})
+local WelcomeNote2Paragraph = WelcomeTab:CreateParagraph({Title = "Currently supporting "..uniqueGameNumber.."unique games.", Content = "HD-GUI currently supports "..uniqueGameNumber.."unique games."})
+
 
 local MovementTab = Window:CreateTab("Movement", 0) -- Title, Image
 local MovementCharacterSection = MovementTab:CreateSection("Character")
@@ -264,7 +267,10 @@ local function startFlying()
 				local moveVector = require(game.Players.LocalPlayer.PlayerScripts:WaitForChild("PlayerModule"):WaitForChild("ControlModule")):GetMoveVector()
 				local camera = workspace.CurrentCamera
 				gyroHandler.CFrame = camera.CFrame
-				velocityHandler.Velocity = (camera.CFrame.RightVector * moveVector.X + camera.CFrame.LookVector * moveVector.Z) * _G.FlySpeed
+				velocityHandler.Velocity = 
+					(camera.CFrame.RightVector * moveVector.X + -- Left/Right
+						camera.CFrame.LookVector * -moveVector.Z) * -- Forward/Backward (corrected direction)
+					_G.FlySpeed
 				task.wait()
 			end
 
