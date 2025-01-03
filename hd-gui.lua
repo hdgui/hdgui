@@ -1,4 +1,4 @@
-local din = "poo"
+local din = "uhhh"
 local uniqueGameNumber = "0"
 
 local players = game:GetService("Players")
@@ -63,7 +63,7 @@ local WelcomeTab = Window:CreateTab("Welcome", 0) -- Title, Image
 local WelcomeNoteSection = WelcomeTab:CreateSection("Notes")
 
 local WelcomeNote1Paragraph = WelcomeTab:CreateParagraph({Title = "Thank you for using HD-GUI!", Content = "Thanks for using HD-GUI! If you know what you are doing, feel free to skip this note. Everything should work in all games, but if something doesn’t, feel free to let us know on our Discord server (which currently does not exist). Since this GUI is made with Rayfield, you can click the settings icon in the top-right corner to change the key that opens and closes the GUI. <b>HD-GUI is not responsible for any in-game or platform bans. If you’re reckless enough to use this on your main account and get banned, that’s entirely on you. Use an alternative account or face the consequences.</b> Proudly made with Rayfield."})
-local WelcomeNote2Paragraph = WelcomeTab:CreateParagraph({Title = "Currently supporting "..uniqueGameNumber.."unique games.", Content = "HD-GUI currently supports "..uniqueGameNumber.."unique games."})
+local WelcomeNote2Paragraph = WelcomeTab:CreateParagraph({Title = "Currently supporting "..uniqueGameNumber.." unique games.", Content = "HD-GUI currently supports "..uniqueGameNumber.." unique games."})
 
 
 local MovementTab = Window:CreateTab("Movement", 0) -- Title, Image
@@ -269,7 +269,7 @@ local function startFlying()
 				gyroHandler.CFrame = camera.CFrame
 				velocityHandler.Velocity = 
 					(camera.CFrame.RightVector * moveVector.X + -- Left/Right
-						camera.CFrame.LookVector * -moveVector.Z) * -- Forward/Backward (corrected direction)
+						camera.CFrame.LookVector * -moveVector.Z) * -- Forward/Backward
 					_G.FlySpeed
 				task.wait()
 			end
@@ -327,16 +327,16 @@ uis.InputBegan:Connect(function(input, gameProcessed)
 	if input.KeyCode == _G.FlyKeybind then
 		if _G.FlyEnabled then
 			if isFlying then
-				stopFlying()
+				stopFlying() -- Turn flying off
 			else
-				startFlying()
+				startFlying() -- Turn flying on
 			end
 		end
 	end
 end)
 
 local PlayerTab = Window:CreateTab("Player", 0) -- Title, Image
-local PlayerSection = PlayerTab:CreateSection("Remove")
+local PlayerVisualSection = PlayerTab:CreateSection("Visual")
 
 local HDGUITab = Window:CreateTab("HD-GUI", 0) -- Title, Image
 local HDGUIRemoveSection = HDGUITab:CreateSection("Remove")
