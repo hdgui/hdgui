@@ -1,4 +1,4 @@
-local din = "uhhh"
+local din = "WORK ALREADY"
 local uniqueGameNumber = "0"
 
 local players = game:GetService("Players")
@@ -304,6 +304,8 @@ local FlyKeybind = MovementTab:CreateKeybind({
 	HoldToInteract = false,
 	Flag = "FlyKeybind",
 	Callback = function(Keybind)
+		print(Enum.KeyCode.F)
+		print(Keybind)
 		_G.FlyKeybind = Keybind
 	end,
 })
